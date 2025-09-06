@@ -90,22 +90,15 @@ export async function generateGroundwaterResponse(
 ): Promise<string> {
   try {
     const systemPrompt = language === "hi" 
-      ? "आप भारतीय भूजल संसाधन आकलन प्रणाली (INGRES) के लिए एक AI सहायक हैं। संक्षिप्त, स्पष्ट उत्तर दें। केवल मुख्य जानकारी जैसे स्थिति, निकासी %, श्रेणी शामिल करें।"
-      : "You are an AI assistant for India Ground Water Resource Estimation System (INGRES). Provide short, clear, and concise answers. Include key information only: status, extraction %, category, recharge if relevant. Keep responses brief and friendly.";
+      ? "केवल 1-2 वाक्यों में उत्तर दें। मुख्य आंकड़े: स्थिति, निकासी %, श्रेणी।"
+      : "Answer in 1-2 sentences only. Key facts: status, extraction %, category. Be extremely brief.";
 
-    const prompt = `Based on this groundwater data: ${JSON.stringify(data, null, 2)}
+    const prompt = `Data: ${JSON.stringify(data, null, 2)}
+Query: ${query.intent} for ${JSON.stringify(query.location)}
 
-User query intent: ${query.intent}
-Location: ${JSON.stringify(query.location)}
-Data type: ${query.dataType}
-
-Generate a concise response (2-3 sentences max) that:
-1. Directly answers the user's question with key facts only
-2. States: status/category, extraction %, and recharge if relevant
-3. Mentions CGWB as data source briefly
-4. Uses friendly tone but stays brief
-
-Avoid long explanations unless specifically requested.`;
+Response format: "[Location]: [Category] - [Key%] extraction. [One insight]"
+Example: "Gujarat: Safe - 45% extraction. Good recharge levels."
+Maximum 15 words total.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
