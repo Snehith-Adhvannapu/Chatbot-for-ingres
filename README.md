@@ -9,13 +9,13 @@ A modern AI-powered web application for querying and analyzing groundwater asses
 ## 🌟 Features
 
 ### 🤖 AI-Powered Chat Interface
-- Natural language queries in English and Hindi
+- Natural language queries 
 - Context-aware conversations with memory
 - Real-time groundwater data analysis
 - Interactive data visualization
 
 ### 🗺️ Comprehensive Data Coverage
-- **Real 2024-2025 assessment data** for all major Indian states
+- **Real assessment data** for all major Indian states
 - State-level groundwater statistics
 - Extraction rates, recharge data, and categorization
 - Historical trends and comparisons
