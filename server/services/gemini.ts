@@ -96,9 +96,15 @@ export async function generateGroundwaterResponse(
     const prompt = `Data: ${JSON.stringify(data, null, 2)}
 Query: ${query.intent} for ${JSON.stringify(query.location)}
 
-Response format: "[Location]: [Category] - [Key%] extraction. [One insight]"
+If data exists:
+Format: "[Location]: [Category] - [X%] extraction. [Brief insight]"
 Example: "Gujarat: Safe - 45% extraction. Good recharge levels."
-Maximum 15 words total.`;
+
+If no data found:
+Format: "No data for [Location]. Try [Similar location] or check latest CGWB reports."
+Example: "No data for Xyz District. Try Karnataka state or check latest CGWB reports."
+
+Maximum 15 words total. Always provide useful guidance.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
