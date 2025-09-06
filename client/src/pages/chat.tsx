@@ -13,7 +13,7 @@ export default function ChatPage() {
     <div className="h-screen flex flex-col">
       {/* Header */}
       <header className="bg-primary text-primary-foreground shadow-lg">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-primary-foreground rounded-lg flex items-center justify-center">
@@ -26,20 +26,24 @@ export default function ChatPage() {
                 <p className="text-primary-foreground/80 text-sm">India Ground Water Resource Estimation System</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-2 bg-primary-foreground/10 rounded-lg px-3 py-2">
+            <div className="flex items-center space-x-6">
+              <div className="hidden lg:flex items-center space-x-3 bg-primary-foreground/10 rounded-lg px-4 py-2">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
                 </svg>
-                <span className="text-sm">CGWB Official Portal</span>
+                <span className="text-sm font-medium">CGWB Official Portal</span>
               </div>
-              <select 
-                className="bg-primary-foreground/10 border-0 rounded-lg px-3 py-2 text-sm text-primary-foreground"
-                data-testid="language-selector"
-              >
-                <option value="en">English</option>
-                <option value="hi">हिंदी</option>
-              </select>
+              <div className="flex items-center space-x-2">
+                <label htmlFor="language-select" className="text-sm font-medium">Language:</label>
+                <select 
+                  id="language-select"
+                  className="bg-primary-foreground/15 border border-primary-foreground/20 rounded-lg px-3 py-2 text-sm text-primary-foreground font-medium cursor-pointer hover:bg-primary-foreground/20 transition-colors"
+                  data-testid="language-selector"
+                >
+                  <option value="en">English</option>
+                  <option value="hi">हिंदी</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -63,23 +67,6 @@ export default function ChatPage() {
         )}
       </div>
 
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-6 right-6 space-y-3">
-        <Button
-          size="icon"
-          className="w-12 h-12 bg-secondary text-secondary-foreground rounded-full shadow-lg hover:bg-secondary/90"
-          data-testid="help-button"
-        >
-          <HelpCircle className="w-5 h-5" />
-        </Button>
-        <Button
-          size="icon"
-          className="w-12 h-12 bg-accent text-accent-foreground rounded-full shadow-lg hover:bg-accent/90"
-          data-testid="settings-button"
-        >
-          <Settings className="w-5 h-5" />
-        </Button>
-      </div>
     </div>
   );
 }

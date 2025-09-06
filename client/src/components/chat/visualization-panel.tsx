@@ -116,7 +116,7 @@ export function VisualizationPanel({ data, onClose }: VisualizationPanelProps) {
   if (!data) return null;
 
   return (
-    <aside className="w-96 bg-card border-l border-border overflow-y-auto scrollbar-thin" data-testid="visualization-panel">
+    <aside className="w-[480px] bg-card border-l border-border overflow-y-auto scrollbar-thin" data-testid="visualization-panel">
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold">Data Visualization</h2>

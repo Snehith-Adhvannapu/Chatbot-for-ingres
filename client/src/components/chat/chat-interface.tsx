@@ -134,8 +134,8 @@ export function ChatInterface({ onDataReceived, onShowVisualization }: ChatInter
   return (
     <main className="flex-1 flex flex-col" data-testid="chat-interface">
       {/* Messages Area */}
-      <div className="flex-1 p-6 overflow-y-auto scrollbar-thin" data-testid="messages-container">
-        <div className="space-y-6">
+      <div className="flex-1 px-8 py-6 overflow-y-auto scrollbar-thin" data-testid="messages-container">
+        <div className="max-w-4xl mx-auto space-y-8">
           {messages.map((message) => (
             <MessageBubble
               key={message.id}
@@ -145,7 +145,7 @@ export function ChatInterface({ onDataReceived, onShowVisualization }: ChatInter
           ))}
           
           {isTyping && (
-            <div className="flex items-start space-x-3" data-testid="typing-indicator">
+            <div className="flex items-start space-x-4" data-testid="typing-indicator">
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2Z"/>
@@ -166,76 +166,80 @@ export function ChatInterface({ onDataReceived, onShowVisualization }: ChatInter
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-border p-6">
-        <div className="flex space-x-3">
-          <div className="flex-1">
-            <div className="relative">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask about groundwater data, assessments, or specific locations..."
-                className="pr-12"
-                disabled={chatMutation.isPending}
-                data-testid="message-input"
-              />
+      <div className="border-t border-border p-8 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex space-x-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask about groundwater data, assessments, or specific locations..."
+                  className="pr-14 py-3 text-base border-2 border-border/50 focus:border-primary bg-background"
+                  disabled={chatMutation.isPending}
+                  data-testid="message-input"
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-foreground"
+                  data-testid="attach-button"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <Button
+              onClick={handleSendMessage}
+              disabled={!input.trim() || chatMutation.isPending}
+              className="px-8 py-3 text-base font-medium"
+              data-testid="send-button"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Send
+            </Button>
+          </div>
+          
+          <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-6">
+              <span className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                </svg>
+                Powered by Gemini AI • CGWB Official Data
+              </span>
               <Button
-                size="icon"
                 variant="ghost"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6"
-                data-testid="attach-button"
+                size="sm"
+                onClick={handleClearChat}
+                className="h-auto px-2 py-1 text-muted-foreground hover:text-foreground"
+                data-testid="clear-chat-button"
               >
-                <Paperclip className="w-4 h-4" />
+                <Trash className="w-4 h-4 mr-2" />
+                Clear Chat
               </Button>
             </div>
-          </div>
-          <Button
-            onClick={handleSendMessage}
-            disabled={!input.trim() || chatMutation.isPending}
-            className="px-6"
-            data-testid="send-button"
-          >
-            <Send className="w-4 h-4 mr-2" />
-            Send
-          </Button>
-        </div>
-        
-        <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-              </svg>
-              Powered by AI • CGWB Official Data
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearChat}
-              className="h-auto p-0 text-muted-foreground hover:text-foreground"
-              data-testid="clear-chat-button"
-            >
-              <Trash className="w-4 h-4 mr-1" />
-              Clear Chat
-            </Button>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-muted-foreground hover:text-foreground"
-              data-testid="voice-input-button"
-            >
-              <Mic className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-muted-foreground hover:text-foreground"
-              data-testid="export-chat-button"
-            >
-              <Share className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto px-2 py-1 text-muted-foreground hover:text-foreground"
+                data-testid="voice-input-button"
+              >
+                <Mic className="w-4 h-4 mr-1" />
+                Voice
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto px-2 py-1 text-muted-foreground hover:text-foreground"
+                data-testid="export-chat-button"
+              >
+                <Share className="w-4 h-4 mr-1" />
+                Export
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Download, User, Bot } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -39,22 +41,41 @@ export function MessageBubble({ message, onShowVisualization }: MessageBubblePro
   };
 
   return (
-    <div className={`flex items-start space-x-3 ${isUser ? "justify-end" : ""}`} data-testid={`message-${message.id}`}>
+    <div className={`flex items-start space-x-4 ${isUser ? "justify-end" : ""}`} data-testid={`message-${message.id}`}>
       {!isUser && (
-        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-          <Bot className="w-5 h-5 text-primary-foreground" />
+        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+          <Bot className="w-6 h-6 text-primary-foreground" />
         </div>
       )}
       
-      <div className={`message-bubble ${isUser ? 'bg-primary text-primary-foreground' : 'bg-card border border-border'} p-4 rounded-lg shadow-sm`}>
+      <div className={`message-bubble ${isUser ? 'bg-primary text-primary-foreground' : 'bg-card border border-border'} p-6 rounded-lg shadow-sm`}>
         {!isUser && message.data?.statistics && (
           <div className="font-medium text-primary mb-3" data-testid="response-title">
             {message.data.statistics ? `${Object.keys(message.data.statistics)[0]} Groundwater Assessment` : "INGRES AI Assistant"}
           </div>
         )}
         
-        <div className="leading-relaxed whitespace-pre-wrap" data-testid="message-content">
-          {message.content}
+        <div className="leading-relaxed prose prose-sm max-w-none dark:prose-invert" data-testid="message-content">
+          {isUser ? (
+            <div className="whitespace-pre-wrap">{message.content}</div>
+          ) : (
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+                ul: ({ children }) => <ul className="mb-3 ml-4 list-disc">{children}</ul>,
+                ol: ({ children }) => <ol className="mb-3 ml-4 list-decimal">{children}</ol>,
+                li: ({ children }) => <li className="mb-1">{children}</li>,
+                strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                em: ({ children }) => <em className="italic text-muted-foreground">{children}</em>,
+                h3: ({ children }) => <h3 className="text-lg font-semibold mb-2 text-primary">{children}</h3>,
+                h4: ({ children }) => <h4 className="text-md font-medium mb-2">{children}</h4>,
+                blockquote: ({ children }) => <blockquote className="border-l-4 border-primary pl-4 my-3 italic">{children}</blockquote>
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          )}
         </div>
 
         {/* Data Visualization for AI responses */}
@@ -190,8 +211,8 @@ export function MessageBubble({ message, onShowVisualization }: MessageBubblePro
       </div>
 
       {isUser && (
-        <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
-          <User className="w-5 h-5 text-secondary-foreground" />
+        <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+          <User className="w-6 h-6 text-secondary-foreground" />
         </div>
       )}
     </div>
