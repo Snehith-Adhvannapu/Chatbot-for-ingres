@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { assessment2025Data, getStateData2025 } from "../data/assessment-2025";
 
 // DON'T DELETE THIS COMMENT
 // Follow these instructions when using this blueprint:
@@ -89,6 +90,47 @@ export async function generateGroundwaterResponse(
   language: string = "en"
 ): Promise<{ response: string; data: any }> {
   try {
+    // Check if query is for 2024-2025 data and use real data
+    const isRecent = query.year === 2024 || query.year === 2025 || 
+                     userMessage.toLowerCase().includes('2024') || 
+                     userMessage.toLowerCase().includes('2025') ||
+                     userMessage.toLowerCase().includes('latest') ||
+                     userMessage.toLowerCase().includes('recent');
+    
+    if (isRecent && query.location?.state) {
+      const realData = getStateData2025(query.location.state);
+      if (realData) {
+        const response = language === "hi" 
+          ? `${realData.state} 2024-2025 का भूजल डेटा:
+• निकासी दर: ${realData.stageOfExtraction.toFixed(1)}%
+• वार्षिक रिचार्ज: ${(realData.annualRecharge/1000).toFixed(0)} हजार HAM
+• वार्षिक निकासी: ${(realData.annualExtraction/1000).toFixed(0)} हजार HAM  
+• श्रेणी: ${realData.category === 'Safe' ? 'सुरक्षित' : realData.category === 'Semi-Critical' ? 'अर्ध-गंभीर' : realData.category === 'Critical' ? 'गंभीर' : 'अति-दोहन'}
+
+${realData.category === 'Over-Exploited' ? 'यह क्षेत्र अति-दोहन की स्थिति में है।' : realData.category === 'Critical' ? 'यह क्षेत्र गंभीर स्थिति में है।' : 'यह क्षेत्र सुरक्षित स्थिति में है।'}`
+          : `Here's the groundwater data for ${realData.state} 2024-2025:
+• Extraction Rate: ${realData.stageOfExtraction.toFixed(1)}%
+• Annual Recharge: ${(realData.annualRecharge/1000).toFixed(0)}k HAM
+• Annual Extraction: ${(realData.annualExtraction/1000).toFixed(0)}k HAM
+• Category: ${realData.category}
+
+${realData.category === 'Over-Exploited' ? 'This region is in over-exploited condition.' : realData.category === 'Critical' ? 'This region is in critical condition.' : 'This region is in safe condition.'}`;
+        
+        return {
+          response,
+          data: {
+            assessments: [realData],
+            statistics: {
+              totalBlocks: 1,
+              [realData.category.toLowerCase().replace('-', '')]: 1,
+              totalExtractableResource: realData.extractableResource/1000,
+              totalExtraction: realData.annualExtraction/1000,
+              averageStageOfExtraction: realData.stageOfExtraction
+            }
+          }
+        };
+      }
+    }
     const systemPrompt = language === "hi" 
       ? `आप भारतीय उपयोगकर्ताओं के लिए CGWB/INGRES डेटा की खोज करने के लिए एक भूजल चैटबॉट हैं।
 

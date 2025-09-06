@@ -149,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Use Google Gemini for translation (reuse existing instance)
       const { generateGroundwaterResponse } = await import("./services/gemini");
-      const ai = await import("@google/genai").then(m => new m.GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" }));
+      const ai = await import("@google/genai").then(m => new m.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" }));
       
       const prompt = `Translate the following text to ${language === 'hi' ? 'Hindi' : 'English'}. Return only the translated text without any additional explanations:\n\n${text}`;
       
