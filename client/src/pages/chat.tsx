@@ -23,7 +23,8 @@ export default function ChatPage() {
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-primary-foreground rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  <path d="M12 2l-6.5 9c-1.5 2.1-1.5 5 0 7.1C6.7 19.7 9.2 21 12 21s5.3-1.3 6.5-2.9c1.5-2.1 1.5-5 0-7.1L12 2z"/>
+                  <circle cx="9" cy="15" r="1.5" fill="rgba(255,255,255,0.3)"/>
                 </svg>
               </div>
               <div>
