@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Download, User, Bot, Volume2 } from "lucide-react";
+import { BarChart, Download, User, Bot, Volume2, Info } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { GroundwaterChart } from "@/components/charts/GroundwaterChart";
+import { GroundwaterDataCard } from "@/components/data/GroundwaterDataCard";
 
 interface Message {
   id: string;
@@ -127,25 +128,37 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
         {/* Data Visualization for AI responses */}
         {!isUser && message.data && (
           <div className="mt-4 space-y-4">
-            {/* Charts Section */}
+            {/* Contextual Disclaimer */}
             {message.data.assessments && message.data.assessments.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {message.data.assessments.slice(0, 4).map((assessment: any, index: number) => (
-                  <GroundwaterChart
-                    key={index}
-                    data={{
-                      extractionPercentage: assessment.stageOfExtraction || 0,
-                      category: assessment.category || 'Unknown',
-                      location: `${assessment.district}, ${assessment.state}`,
-                      rechargeRate: assessment.annualRecharge ? (assessment.annualRecharge / assessment.extractableResource) * 100 : undefined
-                    }}
-                    type="gauge"
-                  />
-                ))}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start space-x-2">
+                <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-800">
+                  <strong>Data Source:</strong> Data shown below is from {message.data.assessments[0]?.state || 'available'} districts as per the latest CGWB report.
+                </div>
               </div>
             )}
 
-            {/* Summary Cards */}
+            {/* Data Cards Section */}
+            {message.data.assessments && message.data.assessments.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-900">Groundwater Assessment Results</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  {message.data.assessments.slice(0, 6).map((assessment: any, index: number) => (
+                    <GroundwaterDataCard
+                      key={index}
+                      region={assessment.district || assessment.block || 'Unknown Region'}
+                      state={assessment.state || 'Unknown State'}
+                      extractionPercentage={assessment.stageOfExtraction || 0}
+                      rechargeRate={assessment.annualRecharge && assessment.extractableResource ? 
+                        (assessment.annualRecharge / assessment.extractableResource) * 100 : undefined}
+                      category={assessment.category || 'Unassessed'}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Summary Statistics */}
             {message.data.statistics && (
               <div className="grid grid-cols-2 gap-3">
                 <Card className="bg-green-50 border-green-200 p-3">
@@ -176,8 +189,39 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
             )}
 
 
+            {/* Interactive Follow-up Suggestions */}
+            {message.data.assessments && message.data.assessments.length > 0 && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">What would you like to do next?</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-left h-auto p-3 whitespace-normal"
+                    data-testid="compare-years-button"
+                  >
+                    <div>
+                      <div className="font-medium">Compare with past 5 years</div>
+                      <div className="text-xs text-muted-foreground">2018–2022 trends</div>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-left h-auto p-3 whitespace-normal"
+                    data-testid="historical-trends-button"
+                  >
+                    <div>
+                      <div className="font-medium">See historical trends</div>
+                      <div className="text-xs text-muted-foreground">For this district</div>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 onClick={onShowVisualization}
@@ -195,7 +239,7 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
                 data-testid="download-report-button"
               >
                 <Download className="w-4 h-4 mr-1" />
-                Download Report
+                Download Detailed Report
               </Button>
               {onReadAloud && (
                 <Button
