@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, Download, User, Bot, Volume2, VolumeX, Info, ChevronDown, ChevronUp, TrendingUp, Languages } from "lucide-react";
+import { BarChart, Download, User, Bot, Info, ChevronDown, ChevronUp, TrendingUp, Languages } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { GroundwaterChart } from "@/components/charts/GroundwaterChart";
@@ -24,9 +24,7 @@ interface Message {
 interface MessageBubbleProps {
   message: Message;
   onShowVisualization?: () => void;
-  onReadAloud?: (text: string) => void;
   onSendMessage?: (message: string) => void;
-  isReading?: boolean;
 }
 
 const downloadReport = (data: any, filename: string = 'groundwater_report') => {
@@ -73,7 +71,7 @@ const generateCSV = (data: any): string => {
   return csv;
 };
 
-export function MessageBubble({ message, onShowVisualization, onReadAloud, onSendMessage, isReading }: MessageBubbleProps) {
+export function MessageBubble({ message, onShowVisualization, onSendMessage }: MessageBubbleProps) {
   const isUser = message.role === "user";
   const [showDataCards, setShowDataCards] = useState(false);
   const [translatedText, setTranslatedText] = useState<string | null>(null);
@@ -309,18 +307,6 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud, onSen
                   </Select>
                 )}
               </div>
-              {onReadAloud && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onReadAloud(translatedText || message.content)}
-                  className="border-green-300 text-green-600 hover:bg-green-50"
-                  data-testid="read-aloud-button"
-                >
-                  {isReading ? <VolumeX className="w-4 h-4 mr-1" /> : <Volume2 className="w-4 h-4 mr-1" />}
-                  {isReading ? 'Stop Reading' : 'Read Aloud'}
-                </Button>
-              )}
             </div>
 
           </div>

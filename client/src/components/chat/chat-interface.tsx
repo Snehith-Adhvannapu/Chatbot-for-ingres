@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Paperclip, Mic, MicOff, Share, Trash, Volume2 } from "lucide-react";
+import { Send, Paperclip, Mic, MicOff, Share, Trash } from "lucide-react";
 
 // Speech Recognition types
 declare global {
@@ -40,8 +40,6 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
   const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
-  const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const [isReading, setIsReading] = useState(false);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -196,60 +194,7 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
     }
   };
 
-  const handleTextToSpeech = (text: string) => {
-    if ('speechSynthesis' in window) {
-      // If currently reading, stop it
-      if (isReading) {
-        window.speechSynthesis.cancel();
-        setIsReading(false);
-        return;
-      }
-      
-      // Stop any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language === "hi" ? "hi-IN" : "en-IN";
-      utterance.rate = 0.8;
-      utterance.pitch = 1;
 
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        setIsReading(true);
-      };
-
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        setIsReading(false);
-      };
-
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        setIsReading(false);
-        toast({
-          title: "Speech Error",
-          description: "Could not read the text aloud.",
-          variant: "destructive",
-        });
-      };
-
-      synthesisRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
-    } else {
-      toast({
-        title: "Speech Not Supported",
-        description: "Text-to-speech is not supported in this browser.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const stopSpeech = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    }
-  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -285,8 +230,6 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
               key={message.id}
               message={message}
               onShowVisualization={() => onShowVisualization?.(true)}
-              onReadAloud={handleTextToSpeech}
-              isReading={isReading}
               onSendMessage={(msg) => {
                 if (chatMutation.isPending) return;
                 setInput(msg);
