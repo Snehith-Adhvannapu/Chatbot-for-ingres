@@ -71,23 +71,6 @@ export function Sidebar({ onSuggestedQuery, language = "en" }: SidebarProps) {
 
   return (
     <aside className="w-80 bg-card border-r border-border flex flex-col" data-testid="sidebar">
-      <div className="p-6 border-b border-border">
-        <h2 className="text-lg font-semibold mb-4">{t('quickQueries')}</h2>
-        <div className="space-y-2">
-          {suggestedQueries.map((query, index) => (
-            <Button
-              key={index}
-              variant="ghost"
-              className="w-full justify-start p-3 h-auto text-left bg-muted hover:bg-accent hover:text-accent-foreground"
-              onClick={() => handleSuggestedQuery(query.text)}
-              data-testid={`suggested-query-${index}`}
-            >
-              <query.icon className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
-              <span className="text-sm break-words leading-tight flex-1">{query.text}</span>
-            </Button>
-          ))}
-        </div>
-      </div>
 
       <div className="p-6 border-b border-border">
         <h3 className="text-md font-semibold mb-3">{t('categories')}</h3>
