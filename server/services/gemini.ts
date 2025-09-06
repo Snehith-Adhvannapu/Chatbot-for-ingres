@@ -90,21 +90,21 @@ export async function generateGroundwaterResponse(
 ): Promise<string> {
   try {
     const systemPrompt = language === "hi" 
-      ? "केवल 1-2 वाक्यों में उत्तर दें। मुख्य आंकड़े: स्थिति, निकासी %, श्रेणी।"
-      : "Answer in 1-2 sentences only. Key facts: status, extraction %, category. Be extremely brief.";
+      ? "आप INGRES भूजल सहायक हैं। संक्षिप्त, तथ्यपरक उत्तर दें। डेटा कार्ड UI में दिखाया जाएगा।"
+      : "You are the INGRES groundwater assistant. Provide brief, factual responses. Data will be shown in organized cards in the UI.";
 
-    const prompt = `Data: ${JSON.stringify(data, null, 2)}
-Query: ${query.intent} for ${JSON.stringify(query.location)}
+    const prompt = `Based on this groundwater data: ${JSON.stringify(data, null, 2)}
 
-If data exists:
-Format: "[Location]: [Category] - [X%] extraction. [Brief insight]"
-Example: "Gujarat: Safe - 45% extraction. Good recharge levels."
+User query: ${query.intent} for ${JSON.stringify(query.location)}
 
-If no data found:
-Format: "No data for [Location]. Try [Similar location] or check latest CGWB reports."
-Example: "No data for Xyz District. Try Karnataka state or check latest CGWB reports."
+Provide a brief, helpful response (2-3 sentences max) about the groundwater status. Focus on:
+- Key findings from the data
+- Overall assessment summary  
+- Any important insights
 
-Maximum 15 words total. Always provide useful guidance.`;
+The detailed data will be displayed in organized cards below your response, so don't repeat all the numbers - just give a helpful overview.
+
+Example: "Found groundwater data for 4 districts in Maharashtra. Most areas show sustainable extraction levels, though Ahmednagar requires attention due to over-exploitation. The data reflects 2022 CGWB assessments."`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
