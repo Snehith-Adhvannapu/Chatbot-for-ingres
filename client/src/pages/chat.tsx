@@ -34,10 +34,10 @@ export default function ChatPage() {
                 <span className="text-sm font-medium">CGWB Official Portal</span>
               </div>
               <div className="flex items-center space-x-2">
-                <label htmlFor="language-select" className="text-sm font-medium">Language:</label>
+                <label htmlFor="language-select" className="text-sm font-medium text-primary-foreground/90">Language:</label>
                 <select 
                   id="language-select"
-                  className="bg-primary-foreground/15 border border-primary-foreground/20 rounded-lg px-3 py-2 text-sm text-primary-foreground font-medium cursor-pointer hover:bg-primary-foreground/20 transition-colors"
+                  className="bg-white/90 border border-primary-foreground/30 rounded-lg px-3 py-2 text-sm text-primary font-medium cursor-pointer hover:bg-white transition-colors shadow-sm"
                   data-testid="language-selector"
                 >
                   <option value="en">English</option>

@@ -197,10 +197,10 @@ export function MessageBubble({ message, onShowVisualization }: MessageBubblePro
                       key={index}
                       variant="ghost"
                       size="sm"
-                      className="text-xs text-left justify-start h-auto p-2 w-full hover:bg-muted"
+                      className="text-xs text-left justify-start h-auto p-2 w-full hover:bg-muted whitespace-normal leading-relaxed"
                       data-testid={`follow-up-${index}`}
                     >
-                      {question}
+                      <span className="text-left break-words">{question}</span>
                     </Button>
                   ))}
                 </div>
