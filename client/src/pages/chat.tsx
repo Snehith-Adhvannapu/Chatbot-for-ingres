@@ -4,12 +4,15 @@ import { Sidebar } from "@/components/chat/sidebar";
 import { VisualizationPanel } from "@/components/chat/visualization-panel";
 import { Button } from "@/components/ui/button";
 import { Settings, HelpCircle } from "lucide-react";
+import { getTranslation, languages, Language } from "@/lib/translations";
 
 export default function ChatPage() {
   const [showVisualization, setShowVisualization] = useState(false);
   const [currentData, setCurrentData] = useState(null);
   const [suggestedQuery, setSuggestedQuery] = useState("");
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState<Language>("en");
+
+  const t = (key: string) => getTranslation(language, key);
 
   return (
     <div className="h-screen flex flex-col">
@@ -24,8 +27,8 @@ export default function ChatPage() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-2xl font-bold" data-testid="header-title">INGRES AI Assistant</h1>
-                <p className="text-primary-foreground/80 text-sm">India Ground Water Resource Estimation System</p>
+                <h1 className="text-2xl font-bold" data-testid="header-title">{t('headerTitle')}</h1>
+                <p className="text-primary-foreground/80 text-sm">{t('headerSubtitle')}</p>
               </div>
             </div>
             <div className="flex items-center space-x-6">
@@ -33,17 +36,22 @@ export default function ChatPage() {
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
                 </svg>
-                <span className="text-sm font-medium">CGWB Official Portal</span>
+                <span className="text-sm font-medium">{t('cgwbPortal')}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <label htmlFor="language-select" className="text-sm font-medium text-primary-foreground/90">Language:</label>
+                <label htmlFor="language-select" className="text-sm font-medium text-primary-foreground/90">{t('language')}</label>
                 <select 
                   id="language-select"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as Language)}
                   className="bg-white/90 border border-primary-foreground/30 rounded-lg px-3 py-2 text-sm text-primary font-medium cursor-pointer hover:bg-white transition-colors shadow-sm"
                   data-testid="language-selector"
                 >
-                  <option value="en">English</option>
-                  <option value="hi">हिंदी</option>
+                  {languages.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.nativeName}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -54,6 +62,7 @@ export default function ChatPage() {
       <div className="flex-1 flex overflow-hidden">
         <Sidebar 
           onSuggestedQuery={setSuggestedQuery}
+          language={language}
           data-testid="sidebar" 
         />
         
@@ -62,6 +71,7 @@ export default function ChatPage() {
           onShowVisualization={setShowVisualization}
           suggestedQuery={suggestedQuery}
           onQueryUsed={() => setSuggestedQuery("")}
+          language={language}
           data-testid="chat-interface"
         />
         
