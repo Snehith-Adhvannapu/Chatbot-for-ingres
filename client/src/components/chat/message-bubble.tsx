@@ -255,25 +255,6 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
               )}
             </div>
 
-            {/* Follow-up Questions */}
-            {message.data.followUpQuestions && message.data.followUpQuestions.length > 0 && (
-              <div className="mt-4">
-                <div className="text-sm font-medium text-muted-foreground mb-2">You might also ask:</div>
-                <div className="space-y-1">
-                  {message.data.followUpQuestions.map((question: string, index: number) => (
-                    <Button
-                      key={index}
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-left justify-start h-auto p-2 w-full hover:bg-muted whitespace-normal leading-relaxed"
-                      data-testid={`follow-up-${index}`}
-                    >
-                      <span className="text-left break-words">{question}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
