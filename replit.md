@@ -13,7 +13,8 @@ Preferred communication style: Simple, everyday language.
 - **UI Library**: shadcn/ui components built on Radix UI primitives with Tailwind CSS styling
 - **Routing**: Wouter for lightweight client-side routing
 - **State Management**: TanStack Query for server state management and caching
-- **Styling**: Tailwind CSS with CSS variables for theming support
+- **Styling**: Tailwind CSS with CSS variables for theming support and improved spacing
+- **Markdown Rendering**: React-Markdown with remark-gfm for rich text formatting in AI responses
 - **Build System**: Vite with custom path aliases (@/, @shared/, @assets/)
 
 ## Backend Architecture
@@ -36,15 +37,16 @@ Preferred communication style: Simple, everyday language.
 - **Session Storage**: Database-backed sessions for persistence
 
 ## AI Integration
-- **Provider**: OpenAI API integration for natural language processing
-- **Query Processing**: Custom service for parsing groundwater-related queries
-- **Response Generation**: AI-powered responses with structured data extraction
+- **Provider**: Google Gemini Flash 2.5 for natural language processing
+- **Query Processing**: Custom service for parsing groundwater-related queries using Gemini API
+- **Response Generation**: AI-powered responses with structured data extraction and markdown formatting
 - **Language Support**: Multi-language support (English/Hindi) with automatic detection
 
 ## External Dependencies
 - **Database**: PostgreSQL (via Neon Database serverless)
-- **AI Services**: OpenAI API for chat completion and query parsing
+- **AI Services**: Google Gemini API for chat completion and query parsing
 - **Development Tools**: Replit-specific plugins for development environment integration
 - **UI Components**: Radix UI primitives for accessible component foundation
 - **Charts**: Chart.js integration for data visualization
 - **Date Handling**: date-fns for date manipulation and formatting
+- **Text Formatting**: react-markdown and remark-gfm for rich AI response formatting
