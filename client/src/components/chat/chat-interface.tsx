@@ -5,7 +5,15 @@ import { Input } from "@/components/ui/input";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Paperclip, Mic, Share, Trash } from "lucide-react";
+import { Send, Paperclip, Mic, MicOff, Share, Trash, Volume2 } from "lucide-react";
+
+// Speech Recognition types
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
 
 interface Message {
   id: string;
@@ -20,14 +28,19 @@ interface ChatInterfaceProps {
   onShowVisualization?: (show: boolean) => void;
   suggestedQuery?: string;
   onQueryUsed?: () => void;
+  language?: string;
 }
 
-export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQuery, onQueryUsed }: ChatInterfaceProps) {
+export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQuery, onQueryUsed, language = "en" }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -37,6 +50,49 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      
+      // Set language based on current language
+      recognitionRef.current.lang = language === "hi" ? "hi-IN" : "en-IN";
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        toast({
+          title: "Voice Input Error",
+          description: "Could not recognize speech. Please try again.",
+          variant: "destructive",
+        });
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [language, toast]);
 
   useEffect(() => {
     // Add welcome message
@@ -115,10 +171,73 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
     chatMutation.mutate({
       message: input,
       sessionId: sessionId || undefined,
-      language: "en",
+      language: language,
     });
 
     setInput("");
+  };
+
+  const handleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      toast({
+        title: "Voice Not Supported",
+        description: "Speech recognition is not supported in this browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+    }
+  };
+
+  const handleTextToSpeech = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Stop any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = language === "hi" ? "hi-IN" : "en-IN";
+      utterance.rate = 0.8;
+      utterance.pitch = 1;
+
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+      };
+
+      utterance.onend = () => {
+        setIsSpeaking(false);
+      };
+
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        toast({
+          title: "Speech Error",
+          description: "Could not read the text aloud.",
+          variant: "destructive",
+        });
+      };
+
+      synthesisRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      toast({
+        title: "Speech Not Supported",
+        description: "Text-to-speech is not supported in this browser.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopSpeech = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -155,6 +274,7 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
               key={message.id}
               message={message}
               onShowVisualization={() => onShowVisualization?.(true)}
+              onReadAloud={handleTextToSpeech}
             />
           ))}
           
@@ -238,11 +358,13 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto px-2 py-1 text-muted-foreground hover:text-foreground"
+                onClick={handleVoiceInput}
+                disabled={chatMutation.isPending}
+                className={`h-auto px-2 py-1 ${isListening ? 'text-red-500 bg-red-50' : 'text-muted-foreground hover:text-foreground'}`}
                 data-testid="voice-input-button"
               >
-                <Mic className="w-4 h-4 mr-1" />
-                Voice
+                {isListening ? <MicOff className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
+                {isListening ? "Stop" : "Voice"}
               </Button>
               <Button
                 variant="ghost"

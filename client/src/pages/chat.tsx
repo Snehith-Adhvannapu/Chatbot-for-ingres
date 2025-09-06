@@ -9,6 +9,7 @@ export default function ChatPage() {
   const [showVisualization, setShowVisualization] = useState(false);
   const [currentData, setCurrentData] = useState(null);
   const [suggestedQuery, setSuggestedQuery] = useState("");
+  const [language, setLanguage] = useState("en");
 
   return (
     <div className="h-screen flex flex-col">

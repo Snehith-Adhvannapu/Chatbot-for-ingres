@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Download, User, Bot } from "lucide-react";
+import { BarChart, Download, User, Bot, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -20,6 +20,7 @@ interface Message {
 interface MessageBubbleProps {
   message: Message;
   onShowVisualization?: () => void;
+  onReadAloud?: (text: string) => void;
 }
 
 const downloadReport = (data: any, filename: string = 'groundwater_report') => {
@@ -66,7 +67,7 @@ const generateCSV = (data: any): string => {
   return csv;
 };
 
-export function MessageBubble({ message, onShowVisualization }: MessageBubbleProps) {
+export function MessageBubble({ message, onShowVisualization, onReadAloud }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
   const getCategoryColor = (category: string) => {
@@ -230,6 +231,18 @@ export function MessageBubble({ message, onShowVisualization }: MessageBubblePro
                 <Download className="w-4 h-4 mr-1" />
                 Download Report
               </Button>
+              {onReadAloud && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onReadAloud(message.content)}
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                  data-testid="read-aloud-button"
+                >
+                  <Volume2 className="w-4 h-4 mr-1" />
+                  Read Aloud
+                </Button>
+              )}
             </div>
 
             {/* Follow-up Questions */}
