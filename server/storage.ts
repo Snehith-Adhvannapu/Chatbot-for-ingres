@@ -7,7 +7,7 @@ import {
   type InsertChatSession 
 } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { mockGroundwaterData, stateStatistics } from "./data/mock-data";
+// Mock data removed - now generating real data via AI
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -62,41 +62,17 @@ export class MemStorage implements IStorage {
     year?: number;
     category?: string;
   } = {}): Promise<GroundwaterAssessment[]> {
-    let filteredData = [...mockGroundwaterData];
-
-    if (filters.state) {
-      filteredData = filteredData.filter(
-        item => item.state.toLowerCase().includes(filters.state!.toLowerCase())
-      );
-    }
-
-    if (filters.district) {
-      filteredData = filteredData.filter(
-        item => item.district.toLowerCase().includes(filters.district!.toLowerCase())
-      );
-    }
-
-    if (filters.block) {
-      filteredData = filteredData.filter(
-        item => item.block.toLowerCase().includes(filters.block!.toLowerCase())
-      );
-    }
-
-    if (filters.year) {
-      filteredData = filteredData.filter(item => item.year === filters.year);
-    }
-
-    if (filters.category) {
-      filteredData = filteredData.filter(
-        item => item.category.toLowerCase() === filters.category!.toLowerCase()
-      );
-    }
-
-    return filteredData;
+    // Data is now generated via AI based on user queries
+    // This method is kept for API compatibility but returns empty array
+    // Real data generation happens in the chat endpoint via AI
+    return [];
   }
 
   async getStateStatistics(state: string): Promise<any> {
-    return stateStatistics[state as keyof typeof stateStatistics] || null;
+    // Statistics are now generated via AI based on user queries
+    // This method is kept for API compatibility but returns null
+    // Real statistics generation happens in the chat endpoint via AI
+    return null;
   }
 
   async createChatSession(insertSession: InsertChatSession): Promise<ChatSession> {

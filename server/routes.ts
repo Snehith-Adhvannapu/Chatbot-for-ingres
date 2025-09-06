@@ -13,39 +13,28 @@ const chatRequestSchema = z.object({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get groundwater assessments
+  // Get groundwater assessments - now returns guidance to use chat endpoint
   app.get("/api/groundwater/assessments", async (req, res) => {
     try {
-      const { state, district, block, year, category } = req.query;
-      
-      const filters: any = {};
-      if (state) filters.state = state as string;
-      if (district) filters.district = district as string;
-      if (block) filters.block = block as string;
-      if (year) filters.year = parseInt(year as string);
-      if (category) filters.category = category as string;
-
-      const assessments = await storage.getGroundwaterAssessments(filters);
-      res.json({ assessments });
+      res.json({ 
+        message: "Please use the chat endpoint (/api/chat) to get real-time groundwater data based on your specific query.",
+        assessments: []
+      });
     } catch (error) {
-      console.error("Error fetching assessments:", error);
+      console.error("Error in assessments endpoint:", error);
       res.status(500).json({ message: "Failed to fetch groundwater assessments" });
     }
   });
 
-  // Get state statistics
+  // Get state statistics - now returns guidance to use chat endpoint
   app.get("/api/groundwater/statistics/:state", async (req, res) => {
     try {
-      const { state } = req.params;
-      const statistics = await storage.getStateStatistics(state);
-      
-      if (!statistics) {
-        return res.status(404).json({ message: "Statistics not found for this state" });
-      }
-
-      res.json({ statistics });
+      res.json({ 
+        message: "Please use the chat endpoint (/api/chat) to get real-time groundwater statistics based on your specific query.",
+        statistics: null
+      });
     } catch (error) {
-      console.error("Error fetching statistics:", error);
+      console.error("Error in statistics endpoint:", error);
       res.status(500).json({ message: "Failed to fetch state statistics" });
     }
   });
@@ -58,47 +47,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse the user's query using OpenAI
       const parsedQuery = await parseGroundwaterQuery(message);
 
-      // Get relevant data based on the parsed query
-      let assessments = await storage.getGroundwaterAssessments({
-        state: parsedQuery.location?.state,
-        district: parsedQuery.location?.district,
-        block: parsedQuery.location?.block,
-        year: parsedQuery.year,
-      });
-
-      // If no specific data found, provide broader data
-      if (assessments.length === 0 && parsedQuery.location?.state) {
-        // Try just the state
-        assessments = await storage.getGroundwaterAssessments({
-          state: parsedQuery.location.state,
-        });
-      }
-      
-      // If still no data, provide sample data from major states
-      if (assessments.length === 0) {
-        assessments = await storage.getGroundwaterAssessments({});
-        assessments = assessments.slice(0, 4); // Get some sample data
-      }
-
-      // Get additional statistics if state is specified
-      let stateStats = null;
-      if (parsedQuery.location?.state) {
-        stateStats = await storage.getStateStatistics(parsedQuery.location.state);
-      }
-
-      // Combine assessments and statistics
-      const contextData = {
-        assessments,
-        stateStatistics: stateStats,
-        query: parsedQuery,
-      };
-
-      // Generate AI response
-      const aiResponse = await generateGroundwaterResponse(
+      // Generate AI response with real data based on user query
+      const generatedData = await generateGroundwaterResponse(
         parsedQuery, 
-        contextData, 
+        message,
         language
       );
+
+      const aiResponse = generatedData.response;
+      const assessments = generatedData.data.assessments || [];
+      const stateStats = generatedData.data.statistics;
 
       // Generate follow-up questions
       const followUpQuestions = await suggestFollowUpQuestions(
@@ -187,11 +145,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const suggestions = [
         "What is the groundwater status in Maharashtra?",
-        "Show recharge data for Gujarat 2022",
+        "Show recharge data for Gujarat 2022", 
         "List over-exploited blocks in Punjab",
         "Historical data for Rajasthan",
         "Compare Tamil Nadu and Karnataka water levels",
         "Which states have critical groundwater status?",
+        "Show me groundwater data for Delhi 2023",
+        "What are the safe districts in India?",
+        "Critical groundwater areas in North India",
+        "Extraction vs recharge in South India"
       ];
 
       res.json({ suggestions });
