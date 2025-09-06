@@ -47,11 +47,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse the user's query using OpenAI
       const parsedQuery = await parseGroundwaterQuery(message);
 
+      // Get previous messages for context
+      let previousMessages: Array<{role: string, content: string}> = [];
+      if (sessionId) {
+        const existingSession = await storage.getChatSession(sessionId);
+        if (existingSession && Array.isArray(existingSession.messages)) {
+          previousMessages = existingSession.messages.slice(-10).map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }));
+        }
+      }
+
       // Generate AI response with real data based on user query
       const generatedData = await generateGroundwaterResponse(
         parsedQuery, 
         message,
-        language
+        language,
+        previousMessages
       );
 
       const aiResponse = generatedData.response || "I'm experiencing technical difficulties. Please try again.";

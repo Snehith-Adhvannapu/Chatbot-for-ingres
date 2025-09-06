@@ -87,7 +87,8 @@ Categories: Safe, Semi-Critical, Critical, Over-Exploited`;
 export async function generateGroundwaterResponse(
   query: GroundwaterQuery, 
   userMessage: string,
-  language: string = "en"
+  language: string = "en",
+  previousMessages: Array<{role: string, content: string}> = []
 ): Promise<{ response: string; data: any }> {
   try {
     // Check if query is for 2024-2025 data and use real data
@@ -180,13 +181,20 @@ Never overload with too much text. Keep everything concise for Indian users.
 
 Generate realistic CGWB/INGRES groundwater data based on real Indian geological patterns.`;
 
-    const prompt = `User Query: "${userMessage}"
-Parsed Query: ${JSON.stringify(query)}
+    // Build context from previous messages
+    let contextSection = "";
+    if (previousMessages.length > 0) {
+      contextSection = `\nPrevious conversation context:\n${previousMessages.slice(-6).map(msg => `${msg.role}: ${msg.content}`).join('\n')}\n`;
+    }
 
-Generate response following the rules above:
+    const prompt = `User Query: "${userMessage}"
+Parsed Query: ${JSON.stringify(query)}${contextSection}
+
+Generate response following the rules above, considering the conversation context:
 
 If greeting/general query: Ask politely for state/district/year
 If specific location query: Provide data in clean cards
+If follow-up question: Use context to provide relevant response
 
 Format as JSON:
 {
