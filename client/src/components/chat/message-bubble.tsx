@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart, Download, User, Bot, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { GroundwaterChart } from "@/components/charts/GroundwaterChart";
 
 interface Message {
   id: string;
@@ -126,6 +127,24 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
         {/* Data Visualization for AI responses */}
         {!isUser && message.data && (
           <div className="mt-4 space-y-4">
+            {/* Charts Section */}
+            {message.data.assessments && message.data.assessments.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {message.data.assessments.slice(0, 4).map((assessment: any, index: number) => (
+                  <GroundwaterChart
+                    key={index}
+                    data={{
+                      extractionPercentage: assessment.stageOfExtraction || 0,
+                      category: assessment.category || 'Unknown',
+                      location: `${assessment.district}, ${assessment.state}`,
+                      rechargeRate: assessment.annualRecharge ? (assessment.annualRecharge / assessment.extractableResource) * 100 : undefined
+                    }}
+                    type="gauge"
+                  />
+                ))}
+              </div>
+            )}
+
             {/* Summary Cards */}
             {message.data.statistics && (
               <div className="grid grid-cols-2 gap-3">
