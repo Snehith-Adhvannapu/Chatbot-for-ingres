@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Download, User, Bot, Volume2, VolumeX, Info, ChevronDown, ChevronUp, TrendingUp, Languages } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -77,6 +78,20 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud, onSen
   const [showDataCards, setShowDataCards] = useState(false);
   const [translatedText, setTranslatedText] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+
+  const languages = [
+    { code: 'hi', name: 'हिंदी (Hindi)', nativeName: 'हिंदी' },
+    { code: 'ta', name: 'தமிழ் (Tamil)', nativeName: 'தமிழ்' },
+    { code: 'te', name: 'తెలుగు (Telugu)', nativeName: 'తెలుగు' },
+    { code: 'bn', name: 'বাংলা (Bengali)', nativeName: 'বাংলা' },
+    { code: 'mr', name: 'मराठी (Marathi)', nativeName: 'मराठी' },
+    { code: 'gu', name: 'ગુજરાતી (Gujarati)', nativeName: 'ગુજરાતી' },
+    { code: 'kn', name: 'ಕನ್ನಡ (Kannada)', nativeName: 'ಕನ್ನಡ' },
+    { code: 'ml', name: 'മലയാളം (Malayalam)', nativeName: 'മലയാളം' },
+    { code: 'pa', name: 'ਪੰਜਾਬੀ (Punjabi)', nativeName: 'ਪੰਜਾਬੀ' },
+    { code: 'or', name: 'ଓଡ଼ିଆ (Odia)', nativeName: 'ଓଡ଼ିଆ' }
+  ];
 
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
@@ -248,38 +263,52 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud, onSen
                   See Historical Trends
                 </Button>
               )}
-              {/* Translation Button */}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () => {
-                  if (translatedText) {
-                    setTranslatedText(null);
-                    return;
-                  }
-                  
-                  setIsTranslating(true);
-                  try {
-                    const response = await fetch('/api/translate', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ text: message.content, language: 'hi' })
-                    });
-                    const data = await response.json();
-                    setTranslatedText(data.translatedText);
-                  } catch (error) {
-                    console.error('Translation error:', error);
-                  } finally {
-                    setIsTranslating(false);
-                  }
-                }}
-                className="border-purple-300 text-purple-600 hover:bg-purple-50"
-                data-testid="translate-button"
-                disabled={isTranslating}
-              >
-                <Languages className="w-4 h-4 mr-1" />
-                {isTranslating ? 'Translating...' : translatedText ? 'Show Original' : 'Translate'}
-              </Button>
+              {/* Translation Section */}
+              <div className="flex items-center gap-2">
+                {translatedText ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setTranslatedText(null)}
+                    className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                    data-testid="show-original-button"
+                  >
+                    <Languages className="w-4 h-4 mr-1" />
+                    Show Original
+                  </Button>
+                ) : (
+                  <Select onValueChange={async (languageCode) => {
+                    setIsTranslating(true);
+                    try {
+                      const response = await fetch('/api/translate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: message.content, language: languageCode })
+                      });
+                      const data = await response.json();
+                      setTranslatedText(data.translatedText);
+                    } catch (error) {
+                      console.error('Translation error:', error);
+                    } finally {
+                      setIsTranslating(false);
+                    }
+                  }}>
+                    <SelectTrigger className="w-auto border-purple-300 text-purple-600 hover:bg-purple-50" data-testid="translate-dropdown">
+                      <div className="flex items-center">
+                        <Languages className="w-4 h-4 mr-1" />
+                        <SelectValue placeholder={isTranslating ? "Translating..." : "Translate"} />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languages.map((lang) => (
+                        <SelectItem key={lang.code} value={lang.code} data-testid={`language-${lang.code}`}>
+                          {lang.nativeName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
               {onReadAloud && (
                 <Button
                   size="sm"
