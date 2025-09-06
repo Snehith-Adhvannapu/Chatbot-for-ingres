@@ -1,0 +1,85 @@
+import { useState } from "react";
+import { ChatInterface } from "@/components/chat/chat-interface";
+import { Sidebar } from "@/components/chat/sidebar";
+import { VisualizationPanel } from "@/components/chat/visualization-panel";
+import { Button } from "@/components/ui/button";
+import { Settings, HelpCircle } from "lucide-react";
+
+export default function ChatPage() {
+  const [showVisualization, setShowVisualization] = useState(false);
+  const [currentData, setCurrentData] = useState(null);
+
+  return (
+    <div className="h-screen flex flex-col">
+      {/* Header */}
+      <header className="bg-primary text-primary-foreground shadow-lg">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-primary-foreground rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold" data-testid="header-title">INGRES AI Assistant</h1>
+                <p className="text-primary-foreground/80 text-sm">India Ground Water Resource Estimation System</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-2 bg-primary-foreground/10 rounded-lg px-3 py-2">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
+                </svg>
+                <span className="text-sm">CGWB Official Portal</span>
+              </div>
+              <select 
+                className="bg-primary-foreground/10 border-0 rounded-lg px-3 py-2 text-sm text-primary-foreground"
+                data-testid="language-selector"
+              >
+                <option value="en">English</option>
+                <option value="hi">हिंदी</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar data-testid="sidebar" />
+        
+        <ChatInterface 
+          onDataReceived={setCurrentData}
+          onShowVisualization={setShowVisualization}
+          data-testid="chat-interface"
+        />
+        
+        {showVisualization && (
+          <VisualizationPanel 
+            data={currentData}
+            onClose={() => setShowVisualization(false)}
+            data-testid="visualization-panel"
+          />
+        )}
+      </div>
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 space-y-3">
+        <Button
+          size="icon"
+          className="w-12 h-12 bg-secondary text-secondary-foreground rounded-full shadow-lg hover:bg-secondary/90"
+          data-testid="help-button"
+        >
+          <HelpCircle className="w-5 h-5" />
+        </Button>
+        <Button
+          size="icon"
+          className="w-12 h-12 bg-accent text-accent-foreground rounded-full shadow-lg hover:bg-accent/90"
+          data-testid="settings-button"
+        >
+          <Settings className="w-5 h-5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
