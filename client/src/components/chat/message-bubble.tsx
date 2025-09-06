@@ -175,59 +175,6 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
               </div>
             )}
 
-            {/* Detailed Statistics */}
-            {message.data.statistics && (
-              <Card className="bg-muted p-4">
-                <h4 className="font-semibold mb-3">Key Statistics</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Annual Extractable Resource:</span>
-                    <span className="font-medium" data-testid="extractable-resource">
-                      {message.data.statistics.totalExtractableResource?.toFixed(2) || 'N/A'} BCM
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Annual Extraction:</span>
-                    <span className="font-medium" data-testid="annual-extraction">
-                      {message.data.statistics.totalExtraction?.toFixed(2) || 'N/A'} BCM
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Stage of Extraction:</span>
-                    <span className="font-medium" data-testid="extraction-stage">
-                      {message.data.statistics.averageStageOfExtraction?.toFixed(1) || 'N/A'}%
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* Assessment Data */}
-            {message.data.assessments && message.data.assessments.length > 0 && (
-              <Card className="border border-border p-4">
-                <h4 className="font-semibold mb-3">Assessment Details</h4>
-                <div className="space-y-2">
-                  {message.data.assessments.slice(0, 3).map((assessment: any, index: number) => (
-                    <div key={index} className={`flex items-center justify-between p-2 rounded border ${getCategoryColor(assessment.category)}`}>
-                      <div className="flex items-center">
-                        <div className={`w-3 h-3 rounded-full mr-2 ${
-                          assessment.category === 'Safe' ? 'bg-green-500' :
-                          assessment.category === 'Semi-Critical' ? 'bg-yellow-500' :
-                          assessment.category === 'Critical' ? 'bg-orange-500' :
-                          'bg-red-500'
-                        }`}></div>
-                        <span className="text-sm font-medium" data-testid={`assessment-district-${index}`}>
-                          {assessment.district}
-                        </span>
-                      </div>
-                      <Badge variant="outline" className={`text-xs ${getCategoryColor(assessment.category)}`}>
-                        {assessment.category}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
 
             {/* Action Buttons */}
             <div className="flex space-x-2">
