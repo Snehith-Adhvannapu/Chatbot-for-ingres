@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Download, User, Bot, Volume2, Info, ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
+import { BarChart, Download, User, Bot, Volume2, VolumeX, Info, ChevronDown, ChevronUp, TrendingUp, Languages } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { GroundwaterChart } from "@/components/charts/GroundwaterChart";
@@ -25,6 +25,7 @@ interface MessageBubbleProps {
   onShowVisualization?: () => void;
   onReadAloud?: (text: string) => void;
   onSendMessage?: (message: string) => void;
+  isReading?: boolean;
 }
 
 const downloadReport = (data: any, filename: string = 'groundwater_report') => {
@@ -71,9 +72,11 @@ const generateCSV = (data: any): string => {
   return csv;
 };
 
-export function MessageBubble({ message, onShowVisualization, onReadAloud, onSendMessage }: MessageBubbleProps) {
+export function MessageBubble({ message, onShowVisualization, onReadAloud, onSendMessage, isReading }: MessageBubbleProps) {
   const isUser = message.role === "user";
   const [showDataCards, setShowDataCards] = useState(false);
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
 
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
@@ -123,7 +126,7 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud, onSen
                 blockquote: ({ children }) => <blockquote className="border-l-4 border-primary pl-4 my-3 italic">{children}</blockquote>
               }}
             >
-              {message.content}
+              {translatedText || message.content}
             </ReactMarkdown>
           )}
         </div>
@@ -245,16 +248,48 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud, onSen
                   See Historical Trends
                 </Button>
               )}
+              {/* Translation Button */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  if (translatedText) {
+                    setTranslatedText(null);
+                    return;
+                  }
+                  
+                  setIsTranslating(true);
+                  try {
+                    const response = await fetch('/api/translate', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ text: message.content, language: 'hi' })
+                    });
+                    const data = await response.json();
+                    setTranslatedText(data.translatedText);
+                  } catch (error) {
+                    console.error('Translation error:', error);
+                  } finally {
+                    setIsTranslating(false);
+                  }
+                }}
+                className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                data-testid="translate-button"
+                disabled={isTranslating}
+              >
+                <Languages className="w-4 h-4 mr-1" />
+                {isTranslating ? 'Translating...' : translatedText ? 'Show Original' : 'Translate'}
+              </Button>
               {onReadAloud && (
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => onReadAloud(message.content)}
-                  className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                  onClick={() => onReadAloud(translatedText || message.content)}
+                  className="border-green-300 text-green-600 hover:bg-green-50"
                   data-testid="read-aloud-button"
                 >
-                  <Volume2 className="w-4 h-4 mr-1" />
-                  Read Aloud
+                  {isReading ? <VolumeX className="w-4 h-4 mr-1" /> : <Volume2 className="w-4 h-4 mr-1" />}
+                  {isReading ? 'Stop Reading' : 'Read Aloud'}
                 </Button>
               )}
             </div>

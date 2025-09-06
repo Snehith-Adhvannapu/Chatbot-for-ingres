@@ -41,6 +41,7 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [isReading, setIsReading] = useState(false);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -197,6 +198,13 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
 
   const handleTextToSpeech = (text: string) => {
     if ('speechSynthesis' in window) {
+      // If currently reading, stop it
+      if (isReading) {
+        window.speechSynthesis.cancel();
+        setIsReading(false);
+        return;
+      }
+      
       // Stop any ongoing speech
       window.speechSynthesis.cancel();
       
@@ -207,14 +215,17 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
 
       utterance.onstart = () => {
         setIsSpeaking(true);
+        setIsReading(true);
       };
 
       utterance.onend = () => {
         setIsSpeaking(false);
+        setIsReading(false);
       };
 
       utterance.onerror = () => {
         setIsSpeaking(false);
+        setIsReading(false);
         toast({
           title: "Speech Error",
           description: "Could not read the text aloud.",
@@ -275,6 +286,7 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
               message={message}
               onShowVisualization={() => onShowVisualization?.(true)}
               onReadAloud={handleTextToSpeech}
+              isReading={isReading}
               onSendMessage={(msg) => {
                 if (chatMutation.isPending) return;
                 setInput(msg);

@@ -138,6 +138,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Translation endpoint
+  app.post("/api/translate", async (req, res) => {
+    try {
+      const { text, language } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ error: "Text is required" });
+      }
+      
+      // Use Google Gemini for translation (reuse existing instance)
+      const { generateGroundwaterResponse } = await import("./services/gemini");
+      const ai = await import("@google/genai").then(m => new m.GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" }));
+      
+      const prompt = `Translate the following text to ${language === 'hi' ? 'Hindi' : 'English'}. Return only the translated text without any additional explanations:\n\n${text}`;
+      
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt
+      });
+      
+      const translatedText = response.text || text;
+      
+      res.json({ translatedText });
+    } catch (error) {
+      console.error("Translation error:", error);
+      res.status(500).json({ error: "Translation failed" });
+    }
+  });
+
   // Search suggestions endpoint
   app.get("/api/search/suggestions", async (req, res) => {
     try {
