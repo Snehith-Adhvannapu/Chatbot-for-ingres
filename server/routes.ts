@@ -59,12 +59,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parsedQuery = await parseGroundwaterQuery(message);
 
       // Get relevant data based on the parsed query
-      const assessments = await storage.getGroundwaterAssessments({
+      let assessments = await storage.getGroundwaterAssessments({
         state: parsedQuery.location?.state,
         district: parsedQuery.location?.district,
         block: parsedQuery.location?.block,
         year: parsedQuery.year,
       });
+
+      // If no specific data found, provide broader data
+      if (assessments.length === 0 && parsedQuery.location?.state) {
+        // Try just the state
+        assessments = await storage.getGroundwaterAssessments({
+          state: parsedQuery.location.state,
+        });
+      }
+      
+      // If still no data, provide sample data from major states
+      if (assessments.length === 0) {
+        assessments = await storage.getGroundwaterAssessments({});
+        assessments = assessments.slice(0, 4); // Get some sample data
+      }
 
       // Get additional statistics if state is specified
       let stateStats = null;
