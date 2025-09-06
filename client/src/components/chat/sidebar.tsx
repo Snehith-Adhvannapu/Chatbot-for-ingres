@@ -79,7 +79,7 @@ export function Sidebar({ onSuggestedQuery }: SidebarProps) {
               data-testid={`suggested-query-${index}`}
             >
               <query.icon className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
-              <span className="text-sm">{query.text}</span>
+              <span className="text-sm break-words leading-tight flex-1">{query.text}</span>
             </Button>
           ))}
         </div>
