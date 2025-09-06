@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Download, User, Bot, Volume2, Info } from "lucide-react";
+import { BarChart, Download, User, Bot, Volume2, Info, ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { GroundwaterChart } from "@/components/charts/GroundwaterChart";
@@ -23,6 +24,7 @@ interface MessageBubbleProps {
   message: Message;
   onShowVisualization?: () => void;
   onReadAloud?: (text: string) => void;
+  onSendMessage?: (message: string) => void;
 }
 
 const downloadReport = (data: any, filename: string = 'groundwater_report') => {
@@ -69,8 +71,9 @@ const generateCSV = (data: any): string => {
   return csv;
 };
 
-export function MessageBubble({ message, onShowVisualization, onReadAloud }: MessageBubbleProps) {
+export function MessageBubble({ message, onShowVisualization, onReadAloud, onSendMessage }: MessageBubbleProps) {
   const isUser = message.role === "user";
+  const [showDataCards, setShowDataCards] = useState(false);
 
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
@@ -138,23 +141,39 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
               </div>
             )}
 
-            {/* Data Cards Section */}
+            {/* Data Cards Toggle Button */}
             {message.data.assessments && message.data.assessments.length > 0 && (
               <div className="space-y-3">
-                <h4 className="font-semibold text-gray-900">Groundwater Assessment Results</h4>
-                <div className="grid grid-cols-1 gap-4">
-                  {message.data.assessments.slice(0, 6).map((assessment: any, index: number) => (
-                    <GroundwaterDataCard
-                      key={index}
-                      region={assessment.district || assessment.block || 'Unknown Region'}
-                      state={assessment.state || 'Unknown State'}
-                      extractionPercentage={assessment.stageOfExtraction || 0}
-                      rechargeRate={assessment.annualRecharge && assessment.extractableResource ? 
-                        (assessment.annualRecharge / assessment.extractableResource) * 100 : undefined}
-                      category={assessment.category || 'Unassessed'}
-                    />
-                  ))}
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDataCards(!showDataCards)}
+                  className="w-full justify-between"
+                  data-testid="toggle-data-cards"
+                >
+                  <span className="font-medium">View Detailed Assessment Data ({message.data.assessments.length} regions)</span>
+                  {showDataCards ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+                
+                {/* Data Cards Section - Collapsible */}
+                {showDataCards && (
+                  <div className="space-y-3 animate-in slide-in-from-top-2">
+                    <h4 className="font-semibold text-gray-900">Groundwater Assessment Results</h4>
+                    <div className="grid grid-cols-1 gap-4">
+                      {message.data.assessments.slice(0, 6).map((assessment: any, index: number) => (
+                        <GroundwaterDataCard
+                          key={index}
+                          region={assessment.district || assessment.block || 'Unknown Region'}
+                          state={assessment.state || 'Unknown State'}
+                          extractionPercentage={assessment.stageOfExtraction || 0}
+                          rechargeRate={assessment.annualRecharge && assessment.extractableResource ? 
+                            (assessment.annualRecharge / assessment.extractableResource) * 100 : undefined}
+                          category={assessment.category || 'Unassessed'}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -189,36 +208,6 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
             )}
 
 
-            {/* Interactive Follow-up Suggestions */}
-            {message.data.assessments && message.data.assessments.length > 0 && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">What would you like to do next?</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="justify-start text-left h-auto p-3 whitespace-normal"
-                    data-testid="compare-years-button"
-                  >
-                    <div>
-                      <div className="font-medium">Compare with past 5 years</div>
-                      <div className="text-xs text-muted-foreground">2018–2022 trends</div>
-                    </div>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="justify-start text-left h-auto p-3 whitespace-normal"
-                    data-testid="historical-trends-button"
-                  >
-                    <div>
-                      <div className="font-medium">See historical trends</div>
-                      <div className="text-xs text-muted-foreground">For this district</div>
-                    </div>
-                  </Button>
-                </div>
-              </div>
-            )}
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-2">
@@ -239,8 +228,23 @@ export function MessageBubble({ message, onShowVisualization, onReadAloud }: Mes
                 data-testid="download-report-button"
               >
                 <Download className="w-4 h-4 mr-1" />
-                Download Detailed Report
+                Download Report
               </Button>
+              {message.data?.assessments && message.data.assessments.length > 0 && onSendMessage && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const state = message.data?.assessments?.[0]?.state || 'this region';
+                    onSendMessage(`Show historical trends for ${state} over the past 5 years`);
+                  }}
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                  data-testid="historical-trends-button"
+                >
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  See Historical Trends
+                </Button>
+              )}
               {onReadAloud && (
                 <Button
                   size="sm"

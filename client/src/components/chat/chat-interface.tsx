@@ -275,6 +275,30 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
               message={message}
               onShowVisualization={() => onShowVisualization?.(true)}
               onReadAloud={handleTextToSpeech}
+              onSendMessage={(msg) => {
+                if (chatMutation.isPending) return;
+                setInput(msg);
+                const userMessage: Message = {
+                  id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-user`,
+                  role: "user",
+                  content: msg,
+                  timestamp: new Date().toISOString(),
+                };
+                setMessages(prev => [...prev, userMessage]);
+                setIsTyping(true);
+                
+                // Add to recent searches
+                const currentSearches = JSON.parse(localStorage.getItem('ingres_recent_searches') || '[]');
+                const updatedSearches = [msg, ...currentSearches.filter((q: string) => q !== msg)].slice(0, 5);
+                localStorage.setItem('ingres_recent_searches', JSON.stringify(updatedSearches));
+                
+                chatMutation.mutate({
+                  message: msg,
+                  sessionId: sessionId || undefined,
+                  language: language,
+                });
+                setInput(''); // Clear input after sending
+              }}
             />
           ))}
           
