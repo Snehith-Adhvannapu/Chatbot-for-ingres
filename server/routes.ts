@@ -54,9 +54,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         language
       );
 
-      const aiResponse = generatedData.response;
-      const assessments = generatedData.data.assessments || [];
-      const stateStats = generatedData.data.statistics;
+      const aiResponse = generatedData.response || "I'm experiencing technical difficulties. Please try again.";
+      const assessments = generatedData?.data?.assessments || [];
+      const stateStats = generatedData?.data?.statistics || null;
 
       // Follow-up questions removed per user request
       const followUpQuestions: string[] = [];

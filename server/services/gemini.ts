@@ -190,6 +190,15 @@ Keep responses short and simple for Indian users.`;
     return result;
   } catch (error) {
     console.error("Error generating response:", error);
+    
+    // Handle specific API overload errors
+    if (error && typeof error === 'object' && 'status' in error && error.status === 503) {
+      return {
+        response: "The AI service is currently busy. Please try again in a moment.",
+        data: { assessments: [], statistics: null }
+      };
+    }
+    
     return {
       response: "I'm experiencing technical difficulties. Please try again or contact support.",
       data: { assessments: [], statistics: null }
