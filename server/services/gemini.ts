@@ -113,12 +113,9 @@ Clarity & Simplicity:
 - Round decimals (e.g., 110.8% instead of 110.778443…)
 - Explain terms like "Over-Exploited," "Critical," "Safe" in plain language
 
-Interactive Follow-up:
-- After every response, offer next steps such as:
-  - "Compare with past 5 years"
-  - "See historical trends for this district"
-  - "Download full report"
-  - "View groundwater quality parameters"
+Direct Response:
+- Provide direct, factual responses without suggesting follow-up questions
+- Focus only on answering the specific query asked
 
 Never Confidently Hallucinate:
 - Do not insert state/district names unless explicitly present in the dataset
@@ -187,38 +184,6 @@ Make the data realistic based on actual Indian groundwater conditions and CGWB p
 }
 
 export async function suggestFollowUpQuestions(context: string): Promise<string[]> {
-  try {
-    const systemPrompt = `Generate 3 relevant follow-up questions based on the conversation context.
-Focus on groundwater topics like trends, comparisons, detailed analysis, or related regions.
-Respond with JSON array format: {"questions": ["question1", "question2", "question3"]}`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      config: {
-        systemInstruction: systemPrompt,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            questions: {
-              type: "array",
-              items: { type: "string" }
-            }
-          },
-          required: ["questions"]
-        }
-      },
-      contents: `Context: ${context}`
-    });
-
-    const rawJson = response.text;
-    if (rawJson) {
-      const result = JSON.parse(rawJson);
-      return result.questions || [];
-    }
-    return [];
-  } catch (error) {
-    console.error("Error generating follow-up questions:", error);
-    return [];
-  }
+  // Follow-up questions feature disabled per user request
+  return [];
 }

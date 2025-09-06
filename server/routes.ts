@@ -58,10 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const assessments = generatedData.data.assessments || [];
       const stateStats = generatedData.data.statistics;
 
-      // Generate follow-up questions
-      const followUpQuestions = await suggestFollowUpQuestions(
-        `User asked: "${message}". AI responded with groundwater data about ${parsedQuery.location?.state || 'various regions'}.`
-      );
+      // Follow-up questions removed per user request
+      const followUpQuestions: string[] = [];
 
       // Create or update chat session
       let session;
