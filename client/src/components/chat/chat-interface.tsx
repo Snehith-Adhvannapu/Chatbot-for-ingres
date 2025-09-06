@@ -119,7 +119,7 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
     },
     onSuccess: (data) => {
       const aiMessage: Message = {
-        id: data.sessionId + "-ai",
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-ai`,
         role: "assistant",
         content: data.response,
         timestamp: new Date().toISOString(),
@@ -154,7 +154,7 @@ export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQu
     if (!input.trim() || chatMutation.isPending) return;
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-user`,
       role: "user",
       content: input,
       timestamp: new Date().toISOString(),
