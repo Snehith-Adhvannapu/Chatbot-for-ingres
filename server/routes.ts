@@ -164,7 +164,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { generateGroundwaterResponse } = await import("./services/gemini");
       const ai = await import("@google/genai").then(m => new m.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" }));
       
-      const prompt = `Translate the following text to ${language === 'hi' ? 'Hindi' : 'English'}. Return only the translated text without any additional explanations:\n\n${text}`;
+      const languageNames = {
+        'hi': 'Hindi',
+        'ta': 'Tamil', 
+        'te': 'Telugu',
+        'bn': 'Bengali',
+        'mr': 'Marathi',
+        'gu': 'Gujarati',
+        'kn': 'Kannada',
+        'ml': 'Malayalam',
+        'pa': 'Punjabi',
+        'or': 'Odia'
+      };
+      
+      const targetLanguage = languageNames[language as keyof typeof languageNames] || 'Hindi';
+      const prompt = `Translate the following text to ${targetLanguage}. Return only the translated text without any additional explanations:\n\n${text}`;
       
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
