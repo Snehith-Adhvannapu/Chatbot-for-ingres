@@ -22,6 +22,50 @@ interface MessageBubbleProps {
   onShowVisualization?: () => void;
 }
 
+const downloadReport = (data: any, filename: string = 'groundwater_report') => {
+  const csvContent = generateCSV(data);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const generateCSV = (data: any): string => {
+  if (!data) return '';
+  
+  let csv = '';
+  
+  // Add statistics if available
+  if (data.statistics) {
+    csv += 'State Statistics\n';
+    csv += 'Metric,Value\n';
+    csv += `Total Blocks,${data.statistics.totalBlocks || 'N/A'}\n`;
+    csv += `Safe Units,${data.statistics.safe || 'N/A'}\n`;
+    csv += `Semi-Critical Units,${data.statistics.semiCritical || 'N/A'}\n`;
+    csv += `Critical Units,${data.statistics.critical || 'N/A'}\n`;
+    csv += `Over-Exploited Units,${data.statistics.overExploited || 'N/A'}\n`;
+    csv += `Total Extractable Resource (BCM),${data.statistics.totalExtractableResource || 'N/A'}\n`;
+    csv += `Total Extraction (BCM),${data.statistics.totalExtraction || 'N/A'}\n`;
+    csv += `Average Stage of Extraction (%),${data.statistics.averageStageOfExtraction || 'N/A'}\n\n`;
+  }
+  
+  // Add assessment details if available
+  if (data.assessments && data.assessments.length > 0) {
+    csv += 'Assessment Details\n';
+    csv += 'State,District,Block,Year,Annual Recharge (BCM),Extractable Resource (BCM),Annual Extraction (BCM),Stage of Extraction (%),Category\n';
+    data.assessments.forEach((assessment: any) => {
+      csv += `${assessment.state},${assessment.district},${assessment.block},${assessment.year},${assessment.annualRecharge},${assessment.extractableResource},${assessment.annualExtraction},${assessment.stageOfExtraction},${assessment.category}\n`;
+    });
+  }
+  
+  return csv;
+};
+
 export function MessageBubble({ message, onShowVisualization }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
@@ -179,6 +223,7 @@ export function MessageBubble({ message, onShowVisualization }: MessageBubblePro
               <Button
                 size="sm"
                 variant="outline"
+                onClick={() => downloadReport(message.data, `ingres_groundwater_report_${Date.now()}`)}
                 className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
                 data-testid="download-report-button"
               >

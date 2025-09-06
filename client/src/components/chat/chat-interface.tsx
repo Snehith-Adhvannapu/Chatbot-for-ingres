@@ -18,9 +18,11 @@ interface Message {
 interface ChatInterfaceProps {
   onDataReceived?: (data: any) => void;
   onShowVisualization?: (show: boolean) => void;
+  suggestedQuery?: string;
+  onQueryUsed?: () => void;
 }
 
-export function ChatInterface({ onDataReceived, onShowVisualization }: ChatInterfaceProps) {
+export function ChatInterface({ onDataReceived, onShowVisualization, suggestedQuery, onQueryUsed }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -46,6 +48,13 @@ export function ChatInterface({ onDataReceived, onShowVisualization }: ChatInter
     };
     setMessages([welcomeMessage]);
   }, []);
+
+  useEffect(() => {
+    if (suggestedQuery) {
+      setInput(suggestedQuery);
+      onQueryUsed?.();
+    }
+  }, [suggestedQuery, onQueryUsed]);
 
   const chatMutation = useMutation({
     mutationFn: async (data: { message: string; sessionId?: string; language?: string }) => {
@@ -97,6 +106,11 @@ export function ChatInterface({ onDataReceived, onShowVisualization }: ChatInter
 
     setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
+
+    // Add to recent searches
+    const currentSearches = JSON.parse(localStorage.getItem('ingres_recent_searches') || '[]');
+    const updatedSearches = [input, ...currentSearches.filter((q: string) => q !== input)].slice(0, 5);
+    localStorage.setItem('ingres_recent_searches', JSON.stringify(updatedSearches));
 
     chatMutation.mutate({
       message: input,

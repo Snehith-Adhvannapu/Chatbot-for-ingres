@@ -8,6 +8,7 @@ import { Settings, HelpCircle } from "lucide-react";
 export default function ChatPage() {
   const [showVisualization, setShowVisualization] = useState(false);
   const [currentData, setCurrentData] = useState(null);
+  const [suggestedQuery, setSuggestedQuery] = useState("");
 
   return (
     <div className="h-screen flex flex-col">
@@ -50,11 +51,16 @@ export default function ChatPage() {
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        <Sidebar data-testid="sidebar" />
+        <Sidebar 
+          onSuggestedQuery={setSuggestedQuery}
+          data-testid="sidebar" 
+        />
         
         <ChatInterface 
           onDataReceived={setCurrentData}
           onShowVisualization={setShowVisualization}
+          suggestedQuery={suggestedQuery}
+          onQueryUsed={() => setSuggestedQuery("")}
           data-testid="chat-interface"
         />
         
